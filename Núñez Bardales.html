@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Embarazo · Semana a Semana</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:       #1CABE2;
+  --blue-dark:  #374EA2;
+  --blue-deep:  #1A3A6E;
+  --blue-light: #D6EEF8;
+  --blue-pale:  #EBF6FC;
+  --sky:        #72C8E8;
+  --white:      #FFFFFF;
+  --ink:        #1A2A3A;
+  --muted:      #6A8099;
+  --border:     #C8DFF0;
+  --green:      #00AC6B;
+  --green-light:#D6F5EB;
+  --shadow:     0 2px 16px rgba(28,171,226,0.10);
+  --radius:     16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--blue-pale);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--blue-dark);
+  color: var(--white);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.topbar-logo span { font-size: 1.4rem; }
+.topbar-fields {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+}
+.topbar-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+}
+.topbar-field label {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.topbar-field input {
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  outline: none;
+  min-width: 0;
+  width: 130px;
+}
+.topbar-field input::placeholder { color: rgba(255,255,255,0.45); }
+.topbar-field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+
+/* ── PAGE LAYOUT ── */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .page {
+    grid-template-columns: 340px 1fr;
+    padding: 2rem 1.5rem 3rem;
+    gap: 1.5rem;
+  }
+  .col-left  { grid-column: 1; display: flex; flex-direction: column; gap: 1.25rem; }
+  .col-right { grid-column: 2; display: flex; flex-direction: column; gap: 1.25rem; }
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-head {
+  background: var(--blue);
+  color: var(--white);
+  padding: 0.75rem 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.card-body { padding: 1.1rem; }
+
+/* ── HERO WEEK ── */
+.hero-card {
+  background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  color: var(--white);
+  box-shadow: 0 4px 24px rgba(55,78,162,0.25);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.hero-week-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--white);
+  min-width: 3rem;
+  text-align: center;
+}
+.hero-week-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+  font-weight: 700;
+}
+.hero-info h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+.hero-info p {
+  font-size: 0.8rem;
+  opacity: 0.82;
+  line-height: 1.5;
+}
+.tri-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.18rem 0.6rem;
+  margin-top: 0.5rem;
+  letter-spacing: 0.06em;
+}
+
+/* ── PROGRESS ── */
+.progress-wrap { padding: 1rem 1.1rem; }
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+.progress-track {
+  background: var(--blue-light);
+  border-radius: 99px;
+  height: 12px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: linear-gradient(90deg, var(--blue-dark), var(--blue));
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.7s cubic-bezier(.4,0,.2,1);
+}
+.days-left {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+.days-left strong { color: var(--blue-dark); }
+
+/* ── MILESTONES ── */
+.milestone-list { display: flex; flex-direction: column; gap: 0; }
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--blue-pale);
+  transition: background 0.15s;
+}
+.milestone-item:last-child { border-bottom: none; }
+.milestone-item.passed { opacity: 0.4; }
+.milestone-item.current { background: var(--blue-pale); }
+.ms-icon { font-size: 1.3rem; width: 1.6rem; text-align: center; }
+.ms-body { flex: 1; }
+.ms-body strong { font-size: 0.85rem; display: block; font-weight: 700; color: var(--ink); }
+.ms-body span   { font-size: 0.75rem; color: var(--muted); }
+.ms-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  background: var(--blue-light);
+  color: var(--blue-dark);
+}
+.ms-pill.done { background: var(--green-light); color: var(--green); }
+
+/* ── CHECKLIST CITAS ── */
+.checklist { display: flex; flex-direction: column; gap: 0; }
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid var(--blue-pale);
+  cursor: pointer;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item input[type="checkbox"] { display: none; }
+.check-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  background: var(--white);
+}
+.check-item.checked .check-box {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--white);
+  font-size: 0.75rem;
+}
+.check-text { flex: 1; }
+.check-text strong { font-size: 0.85rem; font-weight: 700; display: block; }
+.check-text span   { font-size: 0.75rem; color: var(--muted); }
+.check-item.checked .check-text strong { text-decoration: line-through; opacity: 0.5; }
+
+/* ── DIARIO / ENTRIES ── */
+.add-btn {
+  width: 100%;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.18s, transform 0.1s;
+  margin-bottom: 1rem;
+  letter-spacing: 0.01em;
+}
+.add-btn:hover  { background: var(--blue-dark); }
+.add-btn:active { transform: scale(0.98); }
+
+.entry-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 8px rgba(28,171,226,0.07);
+  border-left: 4px solid var(--blue);
+}
+.entry-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+.entry-week {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.18rem 0.55rem;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+.entry-date { font-size: 0.75rem; color: var(--muted); flex: 1; }
+.entry-del {
+  background: none; border: none; color: #ccc;
+  font-size: 1rem; cursor: pointer; padding: 0.1rem;
+}
+.entry-del:hover { color: #e55; }
+.entry-note { font-size: 0.88rem; color: var(--ink); line-height: 1.55; margin-bottom: 0.5rem; }
+.entry-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip {
+  font-size: 0.75rem;
+  background: var(--blue-pale);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+}
+.entry-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-top: 0.65rem; }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+.empty-state .ei { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+/* ── STATS STRIP ── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.stat-box {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-right: 1px solid var(--blue-pale);
+}
+.stat-box:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  color: var(--blue-dark);
+  line-height: 1;
+}
+.stat-lbl { font-size: 0.7rem; color: var(--muted); font-weight: 600; margin-top: 0.25rem; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,42,74,0.55);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+  overflow: hidden;
+  animation: popIn 0.25s ease;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+@keyframes popIn {
+  from { transform: scale(0.94) translateY(12px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-top {
+  background: var(--blue-dark);
+  color: var(--white);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-top h3 { font-size: 1rem; font-weight: 800; }
+.modal-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: var(--white);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+.form-group { margin-bottom: 1rem; }
+.form-group label {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.35rem;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus { border-color: var(--blue); }
+.form-row { display: flex; gap: 0.75rem; }
+.form-row .form-group { flex: 1; }
+.modal-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--blue-pale);
+  display: flex;
+  gap: 0.75rem;
+}
+.btn-save {
+  flex: 1;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.btn-save:hover { background: var(--blue-dark); }
+.btn-cancel {
+  background: var(--blue-pale);
+  color: var(--blue-dark);
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.1rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.photo-label {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--blue-pale);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 0.7rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+.photo-label:hover { border-color: var(--blue); }
+#photo-input { display: none; }
+#photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem; display: none; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* ── WEEK SELECTOR ── */
+#week-selector-bar {
+  background: #1A3A6E;
+  padding: 0.75rem 1.25rem 0.85rem;
+  border-bottom: 3px solid #1CABE2;
+}
+.ws-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.55rem;
+}
+.ws-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.ws-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ws-btn:hover { background: rgba(28,171,226,0.4); border-color: #1CABE2; color: #fff; }
+.ws-btn.passed {
+  background: rgba(0,172,107,0.22);
+  border-color: rgba(0,172,107,0.55);
+  color: rgba(255,255,255,0.9);
+}
+.ws-btn.passed::after { content: '✓'; font-size: 0.6rem; margin-left: 2px; opacity: 0.8; }
+.ws-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(0,172,107,0.35);
+}
+
+/* ── MOBILE overrides ── */
+@media (max-width: 767px) {
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal { border-radius: 20px 20px 0 0; max-height: 88vh; }
+  .hero-week-num { font-size: 3rem; }
+
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    height: 100vh;
+    width: 64px;
+    padding: 0.9rem 0.4rem;
+    z-index: 110;
+  }
+  .sidebar .side-label { display: none; }
+  .sidebar .side-tab { justify-content: center; padding: 0.6rem; }
+  .sidebar .side-tab::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.92);
+    background: var(--blue-deep);
+    color: var(--white);
+    padding: 0.35rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 60;
+  }
+  .sidebar .side-tab:active::after { opacity: 1; }
+
+  /* expanded (drawer open) state on mobile */
+  .sidebar:not(.collapsed) { width: 220px; }
+  .sidebar:not(.collapsed) .side-label { display: inline; }
+  .sidebar:not(.collapsed) .side-tab { justify-content: flex-start; padding: 0.65rem 0.7rem; }
+  .sidebar:not(.collapsed) .side-tab::after { display: none; }
+  .sidebar:not(.collapsed) .sidebar-top { justify-content: space-between; }
+
+  .sidebar-collapse-btn { display: flex !important; }
+
+  .main-content { margin-left: 64px; }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,35,0.5);
+    z-index: 100;
+  }
+  .sidebar-backdrop.show { display: block; }
+}
+
+/* ── APP SHELL / SIDEBAR ── */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: #0E1C30;
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 0.7rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: width 0.22s ease;
+  z-index: 50;
+}
+.sidebar.collapsed { width: 76px; }
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.6rem;
+  padding: 0 0.3rem;
+}
+.sidebar-logo {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.sidebar-collapse-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  transition: transform 0.22s ease, background 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-collapse-btn:hover { background: rgba(255,255,255,0.22); }
+.sidebar.collapsed .sidebar-collapse-btn { transform: rotate(180deg); }
+.sidebar.collapsed .sidebar-top { justify-content: center; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.3rem; }
+.side-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 11px;
+  padding: 0.65rem 0.7rem;
+  color: rgba(255,255,255,0.65);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  position: relative;
+  transition: background 0.15s, color 0.15s;
+}
+.side-tab:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+.side-tab.active { background: var(--white); color: var(--blue-deep); font-weight: 800; }
+.side-icon { font-size: 1.1rem; width: 1.3rem; text-align: center; flex-shrink: 0; }
+.side-label { overflow: hidden; }
+.sidebar.collapsed .side-tab { justify-content: center; padding: 0.65rem; }
+.sidebar.collapsed .side-label { display: none; }
+.sidebar.collapsed .side-tab::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.92);
+  background: var(--blue-deep);
+  color: var(--white);
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  z-index: 60;
+}
+.sidebar.collapsed .side-tab:hover::after { opacity: 1; transform: translateY(-50%) scale(1); }
+.main-content { flex: 1; min-width: 0; }
+
+.placeholder-view {
+  max-width: 600px;
+  margin: 3rem auto;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.placeholder-view .pv-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+.placeholder-view h2 { font-size: 1.15rem; color: var(--blue-dark); margin-bottom: 0.5rem; }
+.placeholder-view p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="sidebar-logo">🤱</div>
+    <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebar()">‹</button>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="side-tab active" id="nav-embarazo" data-tooltip="Control de Embarazo" onclick="switchView('embarazo')">
+      <span class="side-icon">🤰</span><span class="side-label">Control de Embarazo</span>
+    </button>
+    <button class="side-tab" id="nav-crecimiento" data-tooltip="Crecimiento" onclick="switchView('crecimiento')">
+      <span class="side-icon">📈</span><span class="side-label">Crecimiento</span>
+    </button>
+  </nav>
+</aside>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo"><span>🤱</span> Control de Embarazo</div>
+  <div class="topbar-fields">
+    <div class="topbar-field">
+      <label>Mamá:</label>
+      <input type="text" id="baby-name-input" placeholder="Tu nombre">
+    </div>
+    <div class="topbar-field">
+      <label>Papá:</label>
+      <input type="text" id="papa-name-input" placeholder="Tu nombre">
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ VISTA: CONTROL DE EMBARAZO ═══ -->
+<div id="view-embarazo">
+
+<!-- WEEK SELECTOR -->
+<div id="week-selector-bar">
+  <div class="ws-label">Selecciona tu semana de embarazo:</div>
+  <div class="ws-grid" id="ws-grid"></div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- ═══ COLUMNA IZQUIERDA ═══ -->
+  <div class="col-left">
+
+    <!-- HERO -->
+    <div class="hero-card">
+      <div style="text-align:center">
+        <div class="hero-week-num" id="current-week">–</div>
+        <div class="hero-week-label">semana</div>
+      </div>
+      <div class="hero-info">
+        <h2 id="week-headline">Selecciona la semana con + y −</h2>
+        <p id="week-detail">Usa los botones de arriba para indicar en qué semana estás.</p>
+        <div class="tri-badge" id="trimester-badge">– Trimestre</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="card">
+      <div class="card-head">📊 Progreso del embarazo</div>
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          <span>Sem. 1</span>
+          <span id="progress-pct" style="color:var(--blue-dark);font-weight:800">–%</span>
+          <span>Sem. 40</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="days-left" id="days-left">Selecciona tu semana actual con los botones de arriba</div>
+      </div>
+      <!-- STATS STRIP -->
+      <div class="stats-strip">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-days">–</div>
+          <div class="stat-lbl">Semanas restantes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-week">–</div>
+          <div class="stat-lbl">Semana actual</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-entries">0</div>
+          <div class="stat-lbl">Entradas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HITOS -->
+    <div class="card">
+      <div class="card-head">✨ Hitos del embarazo</div>
+      <div class="milestone-list" id="milestone-list">
+        <div class="milestone-item"><div class="ms-body"><span style="color:var(--muted);font-size:0.82rem">Ingresa tu FPP para ver los hitos</span></div></div>
+      </div>
+    </div>
+  </div><!-- /col-left -->
+
+  <!-- ═══ COLUMNA DERECHA ═══ -->
+  <div class="col-right">
+
+    <!-- TAMAÑO BEBÉ -->
+    <div class="card">
+      <div class="card-head">🍉 Tamaño del bebé esta semana</div>
+      <div class="card-body" style="display:flex;align-items:center;gap:1rem">
+        <div style="font-size:3rem" id="size-emoji">🌱</div>
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:var(--blue-dark)" id="size-name">–</div>
+          <div style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem" id="size-desc">Configura tu FPP para ver el desarrollo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIARIO -->
+    <div class="card">
+      <div class="card-head" id="diary-title">📖 Mi diario del embarazo</div>
+      <div class="card-body" style="padding-bottom:0.5rem">
+        <button class="add-btn" onclick="openModal()">＋ Nueva entrada semanal</button>
+        <button class="add-btn" id="toggle-entries-btn" style="background:var(--blue-pale);color:var(--blue-dark)" onclick="toggleEntries()">🙈 Ocultar entradas</button>
+        <div id="entries-list">
+          <div class="empty-state">
+            <div class="ei">📝</div>
+            <p>Aún no tienes entradas.<br>¡Registra cómo te sientes esta semana!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /col-right -->
+
+</div><!-- /page -->
+
+</div><!-- /view-embarazo -->
+
+<!-- ═══ VISTA: CRECIMIENTO ═══ -->
+<div id="view-crecimiento" style="display:none">
+  <div class="placeholder-view">
+    <div class="pv-emoji">🚧</div>
+    <h2>Próximamente</h2>
+    <p>Esta sección de seguimiento de crecimiento del bebé está en construcción. ¡Pronto podrás registrar aquí su desarrollo!</p>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeBg(event)">
+  <div class="modal">
+    <div class="modal-top">
+      <h3>Nueva entrada · Semana <span id="modal-week">–</span></h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>¿Cómo te sientes hoy?</label>
+        <textarea id="note-text" rows="3" placeholder="Síntomas, emociones, pensamientos…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>💌 Mensaje de papá</label>
+        <textarea id="note-papa" rows="2" placeholder="Escribe algo para mamá y el bebé…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>💌 Mensaje de mamá</label>
+        <textarea id="note-mama" rows="2" placeholder="Escribe algo para papá y el bebé…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>📏 Barriga (cm)</label>
+        <input type="number" id="note-belly" placeholder="Ej: 28" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>😊 Estado de ánimo</label>
+        <select id="note-mood">
+          <option value="">– Selecciona –</option>
+          <option value="😊 Feliz">😊 Feliz</option>
+          <option value="😴 Cansada">😴 Cansada</option>
+          <option value="🤢 Con náuseas">🤢 Con náuseas</option>
+          <option value="😢 Emotiva">😢 Emotiva</option>
+          <option value="💪 Con energía">💪 Con energía</option>
+          <option value="😰 Ansiosa">😰 Ansiosa</option>
+          <option value="🥰 Enamorada">🥰 Enamorada</option>
+          <option value="😤 Irritable">😤 Irritable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>📸 Foto (opcional)</label>
+        <label class="photo-label" for="photo-input">📷 Seleccionar foto</label>
+        <input type="file" id="photo-input" accept="image/*" onchange="previewPhoto(this)">
+        <img id="photo-preview" alt="Vista previa">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveEntry()">Guardar entrada</button>
+    </div>
+  </div>
+</div>
+
+<footer>Control de embarazo · Hecho con 💙 para mamás</footer>
+
+</div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<script>
+const MILESTONES = [
+  { week: 6,  icon: '❤️', title: 'Primer latido', desc: 'El corazón empieza a latir' },
+  { week: 8,  icon: '🧬', title: 'Órganos formándose', desc: 'Corazón, pulmones y cerebro' },
+  { week: 10, icon: '🤏', title: 'Ya es un feto', desc: 'Mide ~3 cm, tiene deditos' },
+  { week: 12, icon: '🔊', title: 'Doppler disponible', desc: 'Se escucha el corazón' },
+  { week: 16, icon: '🏃', title: 'Movimientos', desc: 'Puede mover brazos y piernas' },
+  { week: 20, icon: '🔬', title: 'Eco morfológica', desc: 'Pueden revelar el sexo' },
+  { week: 24, icon: '👂', title: 'Escucha tu voz', desc: 'El bebé puede oírte' },
+  { week: 28, icon: '👀', title: 'Abre los ojos', desc: 'Reacciona a la luz' },
+  { week: 32, icon: '🔄', title: 'Posición final', desc: 'Se prepara para nacer' },
+  { week: 36, icon: '⬇️', title: 'Encajamiento', desc: 'La cabeza baja a la pelvis' },
+  { week: 40, icon: '🎉', title: '¡Fecha probable de parto!', desc: '¡El gran momento!' },
+];
+
+
+const SIZES = [
+  {w:1,  e:'🌱', name:'Semilla de amapola', desc:'Todo comienza con una sola célula.'},
+  {w:4,  e:'🌾', name:'Grano de arroz',     desc:'El embrión tiene apenas 1 mm.'},
+  {w:6,  e:'🫛', name:'Guisante',           desc:'El corazón empieza a formarse.'},
+  {w:8,  e:'🫘', name:'Frijol',             desc:'Tiene brotes de brazos y piernas.'},
+  {w:10, e:'🫐', name:'Arándano',           desc:'Ya tiene deditos y nariz.'},
+  {w:12, e:'🍒', name:'Ciruela',            desc:'Mide unos 5 cm, ¡es un feto!'},
+  {w:14, e:'🍋', name:'Limón',              desc:'Abre y cierra los puños.'},
+  {w:16, e:'🥑', name:'Aguacate',           desc:'Puede hacer muecas.'},
+  {w:18, e:'🥭', name:'Mango',              desc:'El bebé escucha sonidos.'},
+  {w:20, e:'🍌', name:'Plátano',            desc:'¡Puedes sentir los primeros movimientos!'},
+  {w:22, e:'🌽', name:'Mazorca de maíz',    desc:'Ya tiene cejas y párpados.'},
+  {w:24, e:'🌽', name:'Maíz grande',        desc:'Sus pulmones se desarrollan.'},
+  {w:26, e:'🥬', name:'Lechuga',            desc:'Abre los ojos por primera vez.'},
+  {w:28, e:'🍆', name:'Berenjena',          desc:'Tiene pelo y uñas.'},
+  {w:30, e:'🥦', name:'Brócoli grande',     desc:'El cerebro crece rápidamente.'},
+  {w:32, e:'🍈', name:'Melón cantalupo',    desc:'Se posiciona para el nacimiento.'},
+  {w:34, e:'🍍', name:'Piña',               desc:'Sus pulmones están casi listos.'},
+  {w:36, e:'🍉', name:'Sandía pequeña',     desc:'La mayoría de órganos están maduros.'},
+  {w:38, e:'🎃', name:'Calabaza mediana',   desc:'Está listo para nacer.'},
+  {w:40, e:'🍉', name:'Sandía',             desc:'¡La fecha probable de parto ha llegado!'},
+];
+
+// ── SUPABASE CONFIG ──
+const SB_URL = 'https://fiuuejnnivritwrhrtlb.supabase.co';
+const SB_PUB = 'sb_publishable_mfFsvdFyz1UbkKCU0HMCbw_Ll1RYKHp';
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_PUB,
+  'Authorization': 'Bearer ' + SB_PUB,
+  'Prefer': 'return=representation'
+};
+
+async function sbGet(table, params = '') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: SB_HEADERS });
+  return r.ok ? r.json() : [];
+}
+async function sbPost(table, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body) });
+  return r.ok ? r.json() : null;
+}
+async function sbDelete(table, filter) {
+  await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: SB_HEADERS });
+}
+async function sbUpsert(table, body) {
+  const h = { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=representation' };
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: h, body: JSON.stringify(body) });
+  return r.ok ? r.json() : null;
+}
+
+let entries = [];
+let checks  = {};
+let currentPhotoData = null;
+let currentWeekNum   = 0;
+
+// ── TOAST ──
+function showToast(msg, ok = true) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+    background:${ok ? '#1CABE2' : '#e55'};color:#fff;padding:0.6rem 1.2rem;
+    border-radius:99px;font-size:0.85rem;font-weight:700;z-index:9999;
+    box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.4s`;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ── LOAD FROM SUPABASE ──
+async function loadFromCloud() {
+  try {
+    // Entradas
+    const rows = await sbGet('entradas', 'order=id.desc');
+    entries = rows.map(r => ({
+      id: r.id, week: r.semana, date: r.fecha,
+      text: r.nota, papa: r.mensaje_papa, mama: r.mensaje_mama, belly: r.barriga,
+      mood: r.estado_animo, photo: r.foto
+    }));
+
+    // Config (semana + checklist)
+    const cfgs = await sbGet('configuracion');
+    for (const c of cfgs) {
+      if (c.clave === 'semana_actual') currentWeekNum = parseInt(c.valor) || 0;
+      if (c.clave === 'checklist')     checks = JSON.parse(c.valor || '{}');
+      if (c.clave === 'nombre_mama') {
+        const inp = document.getElementById('baby-name-input');
+        if (!inp.value) inp.value = c.valor;
+      }
+      if (c.clave === 'nombre_papa') {
+        const inp = document.getElementById('papa-name-input');
+        if (!inp.value) inp.value = c.valor;
+      }
+    }
+  } catch(e) { showToast('Sin conexión, modo local', false); }
+
+  renderWeekGrid();
+  if (currentWeekNum >= 1) updateAll(currentWeekNum);
+  else renderEntries();
+}
+
+window.addEventListener('DOMContentLoaded', () => { loadFromCloud(); });
+
+document.getElementById('baby-name-input').addEventListener('change', async () => {
+  const name = document.getElementById('baby-name-input').value.trim();
+  await sbUpsert('configuracion', { clave: 'nombre_mama', valor: name });
+});
+
+document.getElementById('papa-name-input').addEventListener('change', async () => {
+  const name = document.getElementById('papa-name-input').value.trim();
+  await sbUpsert('configuracion', { clave: 'nombre_papa', valor: name });
+});
+
+function renderWeekGrid() {
+  const grid = document.getElementById('ws-grid');
+  grid.innerHTML = '';
+  for (let w = 1; w <= 40; w++) {
+    const btn = document.createElement('button');
+    let cls = 'ws-btn';
+    if (w === currentWeekNum) cls += ' active';
+    else if (w < currentWeekNum) cls += ' passed';
+    btn.className = cls;
+    btn.textContent = w;
+    btn.title = 'Semana ' + w;
+    btn.onclick = () => selectWeek(w);
+    grid.appendChild(btn);
+  }
+}
+
+async function selectWeek(w) {
+  currentWeekNum = w;
+  renderWeekGrid();
+  updateAll(w);
+  await sbUpsert('configuracion', { clave: 'semana_actual', valor: String(w) });
+}
+
+function updateAll(week) {
+  const pct  = Math.min(100, Math.round((week / 40) * 100));
+  const tri  = week <= 13 ? '1er' : week <= 26 ? '2do' : '3er';
+  const size = getSize(week);
+  const weeksLeft = Math.max(0, 40 - week);
+
+  document.getElementById('current-week').textContent   = week;
+  document.getElementById('modal-week').textContent     = week;
+  document.getElementById('progress-fill').style.width  = pct + '%';
+  document.getElementById('progress-pct').textContent   = pct + '%';
+  document.getElementById('trimester-badge').textContent= tri + ' Trimestre';
+  document.getElementById('stat-week').textContent      = week;
+  document.getElementById('stat-days').textContent      = weeksLeft;
+  document.getElementById('week-headline').textContent  = `Semana ${week} de 40`;
+  document.getElementById('week-detail').textContent    = weeksLeft > 0
+    ? `Faltan aproximadamente ${weeksLeft} semanas para el parto.`
+    : '¡Ya llegaste a la semana 40! 🎉';
+  document.getElementById('days-left').innerHTML        = weeksLeft > 0
+    ? `Aproximadamente <strong>${weeksLeft} semanas</strong> para el parto`
+    : '<strong>¡Semana 40! El gran día se acerca 🎉</strong>';
+
+  document.getElementById('size-emoji').textContent = size.e;
+  document.getElementById('size-name').textContent  = size.name;
+  document.getElementById('size-desc').textContent  = size.desc;
+
+  renderMilestones(week);
+  renderEntries();
+}
+
+function getSize(w) {
+  let best = SIZES[0];
+  for (const s of SIZES) { if (w >= s.w) best = s; }
+  return best;
+}
+
+function renderMilestones(currentWeek) {
+  const container = document.getElementById('milestone-list');
+  container.innerHTML = '';
+  const visible = MILESTONES.filter(m => m.week >= currentWeek - 2).slice(0, 6);
+  for (const m of visible) {
+    const passed  = currentWeek > m.week;
+    const current = Math.abs(currentWeek - m.week) <= 1;
+    const div = document.createElement('div');
+    div.className = 'milestone-item' + (passed ? ' passed' : '') + (current ? ' current' : '');
+    div.innerHTML = `
+      <span class="ms-icon">${m.icon}</span>
+      <div class="ms-body"><strong>${m.title}</strong><span>${m.desc}</span></div>
+      <span class="ms-pill ${passed ? 'done' : ''}">${passed ? '✓' : 'Sem.'} ${m.week}</span>`;
+    container.appendChild(div);
+  }
+}
+
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('note-text').value   = '';
+  document.getElementById('note-papa').value   = '';
+  document.getElementById('note-mama').value   = '';
+  document.getElementById('note-belly').value  = '';
+  document.getElementById('note-mood').value   = '';
+  document.getElementById('photo-preview').style.display = 'none';
+  currentPhotoData = null;
+}
+function closeBg(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+function switchView(view) {
+  document.getElementById('view-embarazo').style.display    = view === 'embarazo'    ? '' : 'none';
+  document.getElementById('view-crecimiento').style.display = view === 'crecimiento' ? '' : 'none';
+  document.getElementById('nav-embarazo').classList.toggle('active', view === 'embarazo');
+  document.getElementById('nav-crecimiento').classList.toggle('active', view === 'crecimiento');
+
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.getElementById('sidebar-backdrop').classList.remove('show');
+  }
+}
+
+function toggleSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  sidebar.classList.toggle('collapsed');
+  if (window.innerWidth < 768) {
+    backdrop.classList.toggle('show', !sidebar.classList.contains('collapsed'));
+  }
+}
+
+function initSidebarForViewport() {
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.add('collapsed');
+  }
+}
+initSidebarForViewport();
+
+let entriesVisible = true;
+function toggleEntries() {
+  entriesVisible = !entriesVisible;
+  document.getElementById('entries-list').style.display = entriesVisible ? '' : 'none';
+  document.getElementById('toggle-entries-btn').textContent = entriesVisible ? '🙈 Ocultar entradas' : '👁️ Ver entradas';
+}
+
+function previewPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentPhotoData = e.target.result;
+    const prev = document.getElementById('photo-preview');
+    prev.src = currentPhotoData; prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveEntry() {
+  const week   = currentWeekNum || 0;
+  const text   = document.getElementById('note-text').value.trim();
+  const papa   = document.getElementById('note-papa').value.trim();
+  const mama   = document.getElementById('note-mama').value.trim();
+  const belly  = document.getElementById('note-belly').value;
+  const mood   = document.getElementById('note-mood').value;
+  if (!text && !papa && !mama && !belly && !mood) { alert('Agrega al menos un dato o nota.'); return; }
+
+  const fecha = new Date().toLocaleDateString('es', {day:'numeric',month:'long',year:'numeric'});
+  const row = {
+    id: Date.now(),
+    semana: week,
+    fecha,
+    nota: text || null,
+    mensaje_papa: papa || null,
+    mensaje_mama: mama || null,
+    barriga: belly ? parseFloat(belly) : null,
+    estado_animo: mood || null,
+    foto: currentPhotoData || null
+  };
+
+  const saved = await sbPost('entradas', row);
+  if (saved) {
+    entries.unshift({ id: row.id, week, date: fecha, text, papa, mama, belly: row.barriga, mood, photo: currentPhotoData });
+    showToast('✓ Entrada guardada en la nube');
+  } else {
+    showToast('Error al guardar', false);
+  }
+  closeModal();
+  renderEntries();
+}
+
+async function deleteEntry(id) {
+  if (!confirm('¿Eliminar esta entrada?')) return;
+  await sbDelete('entradas', `id=eq.${id}`);
+  entries = entries.filter(e => e.id !== id);
+  showToast('Entrada eliminada');
+  renderEntries();
+}
+
+function renderEntries() {
+  document.getElementById('stat-entries').textContent = entries.length;
+
+  const title = document.getElementById('diary-title');
+  if (title) title.textContent = currentWeekNum ? `📖 Comentario · Semana ${currentWeekNum}` : '📖 Mi diario del embarazo';
+
+  const weekEntries = currentWeekNum ? entries.filter(e => e.week === currentWeekNum) : entries;
+
+  const container = document.getElementById('entries-list');
+  if (!weekEntries.length) {
+    container.innerHTML = currentWeekNum
+      ? `<div class="empty-state"><div class="ei">📝</div><p>Aún no hay comentario para la semana ${currentWeekNum}.<br>¡Agrega uno con "Nueva entrada semanal"!</p></div>`
+      : `<div class="empty-state"><div class="ei">📝</div><p>Aún no tienes entradas.<br>¡Registra cómo te sientes esta semana!</p></div>`;
+    return;
+  }
+  container.innerHTML = '';
+  for (const e of weekEntries) {
+    const card = document.createElement('div');
+    card.className = 'entry-card';
+    let chips = '';
+    if (e.mood)   chips += `<span class="chip">${e.mood}</span>`;
+    if (e.belly)  chips += `<span class="chip">📏 ${e.belly} cm</span>`;
+    card.innerHTML = `
+      <div class="entry-head">
+        <span class="entry-week">Sem. ${e.week}</span>
+        <span class="entry-date">${e.date}</span>
+        <button class="entry-del" onclick="deleteEntry(${e.id})">✕</button>
+      </div>
+      ${e.text ? `<p class="entry-note">${e.text}</p>` : ''}
+      ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
+      ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
+      ${chips ? `<div class="entry-chips">${chips}</div>` : ''}
+      ${e.photo ? `<img class="entry-photo" src="${e.photo}" alt="Foto">` : ''}`;
+    container.appendChild(card);
+  }
+}
+</script>
+</body>
+</html>
