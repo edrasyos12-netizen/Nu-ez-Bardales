@@ -4,54 +4,91 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Embarazo · Semana a Semana</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --blue:       #1CABE2;
-  --blue-dark:  #374EA2;
-  --blue-deep:  #1A3A6E;
-  --blue-light: #D6EEF8;
-  --blue-pale:  #EBF6FC;
-  --sky:        #72C8E8;
-  --white:      #FFFFFF;
-  --ink:        #1A2A3A;
-  --muted:      #6A8099;
-  --border:     #C8DFF0;
-  --green:      #00AC6B;
-  --green-light:#D6F5EB;
-  --shadow:     0 2px 16px rgba(28,171,226,0.10);
-  --radius:     16px;
+  /* UNICEF institutional palette */
+  --unicef-blue:   #1CABE2;
+  --blue:          #1CABE2;
+  --blue-dark:     #374EA2;
+  --blue-deep:     #00305C;
+  --blue-navy:     #142C50;
+  --blue-light:    #D9EFFA;
+  --blue-pale:     #F2F8FC;
+  --sky:           #72C8E8;
+  --warm:          #F5A623;
+  --warm-pale:     #FDF1DE;
+  --white:         #FFFFFF;
+  --ink:           #15263D;
+  --muted:         #5C7088;
+  --border:        #D5E6F2;
+  --green:         #00AC6B;
+  --green-light:   #DEF5EC;
+  --shadow:        0 4px 22px rgba(20,44,80,0.08);
+  --shadow-soft:   0 2px 10px rgba(20,44,80,0.06);
+  --radius:        14px;
+  --radius-sm:     9px;
+  --font-display:  'Source Serif 4', Georgia, serif;
+  --font-body:     'Nunito Sans', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   background: var(--blue-pale);
   color: var(--ink);
   min-height: 100vh;
 }
 
+/* ── INSTITUTIONAL LETTERHEAD ── */
+.letterhead {
+  background: var(--blue-deep);
+  color: var(--white);
+  padding: 0.55rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.92;
+  border-bottom: 3px solid var(--unicef-blue);
+}
+.letterhead .lh-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--unicef-blue); }
+
 /* ── TOP BAR ── */
 .topbar {
-  background: var(--blue-dark);
+  background: var(--blue-deep);
   color: var(--white);
-  padding: 0.75rem 1.5rem;
+  padding: 0.85rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .topbar-logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
-  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   white-space: nowrap;
 }
-.topbar-logo span { font-size: 1.4rem; }
+.topbar-logo span {
+  font-size: 1rem;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--unicef-blue);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 .topbar-fields {
   display: flex;
   gap: 0.75rem;
@@ -64,21 +101,24 @@ body {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   padding: 0.3rem 0.7rem;
 }
 .topbar-field label {
-  font-size: 0.75rem;
-  opacity: 0.75;
+  font-size: 0.72rem;
+  opacity: 0.7;
   white-space: nowrap;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .topbar-field input {
   background: transparent;
   border: none;
   color: var(--white);
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.85rem;
   outline: none;
   min-width: 0;
@@ -111,70 +151,80 @@ body {
 .card {
   background: var(--white);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 .card-head {
-  background: var(--blue);
+  background: var(--blue-navy);
   color: var(--white);
-  padding: 0.75rem 1.1rem;
-  font-size: 0.8rem;
-  font-weight: 800;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.74rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--unicef-blue);
 }
 .card-body { padding: 1.1rem; }
 
 /* ── HERO WEEK ── */
 .hero-card {
-  background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+  background: var(--blue-deep);
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(28,171,226,0.25), transparent 55%);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: 1.6rem 1.5rem;
   color: var(--white);
-  box-shadow: 0 4px 24px rgba(55,78,162,0.25);
+  box-shadow: var(--shadow);
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.4rem;
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--unicef-blue);
 }
 .hero-week-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 4rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 3.6rem;
   line-height: 1;
   color: var(--white);
   min-width: 3rem;
   text-align: center;
 }
 .hero-week-label {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.7;
+  letter-spacing: 0.14em;
+  opacity: 0.65;
   font-weight: 700;
 }
 .hero-info h2 {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 0.3rem;
   line-height: 1.3;
 }
 .hero-info p {
   font-size: 0.8rem;
-  opacity: 0.82;
+  opacity: 0.78;
   line-height: 1.5;
 }
 .tri-badge {
   display: inline-block;
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 20px;
-  font-size: 0.68rem;
+  background: rgba(28,171,226,0.22);
+  border: 1px solid rgba(28,171,226,0.5);
+  border-radius: 4px;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.18rem 0.6rem;
-  margin-top: 0.5rem;
-  letter-spacing: 0.06em;
+  padding: 0.2rem 0.6rem;
+  margin-top: 0.55rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 /* ── PROGRESS ── */
@@ -189,14 +239,14 @@ body {
 }
 .progress-track {
   background: var(--blue-light);
-  border-radius: 99px;
-  height: 12px;
+  border-radius: 4px;
+  height: 10px;
   overflow: hidden;
 }
 .progress-fill {
-  background: linear-gradient(90deg, var(--blue-dark), var(--blue));
+  background: var(--unicef-blue);
   height: 100%;
-  border-radius: 99px;
+  border-radius: 4px;
   transition: width 0.7s cubic-bezier(.4,0,.2,1);
 }
 .days-left {
@@ -229,7 +279,7 @@ body {
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.18rem 0.55rem;
-  border-radius: 20px;
+  border-radius: 4px;
   white-space: nowrap;
   background: var(--blue-light);
   color: var(--blue-dark);
@@ -272,12 +322,12 @@ body {
 /* ── DIARIO / ENTRIES ── */
 .add-btn {
   width: 100%;
-  background: var(--blue);
+  background: var(--unicef-blue);
   color: var(--white);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 0.85rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
@@ -294,11 +344,12 @@ body {
 
 .entry-card {
   background: var(--white);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 1rem 1.1rem;
   margin-bottom: 0.75rem;
-  box-shadow: 0 1px 8px rgba(28,171,226,0.07);
-  border-left: 4px solid var(--blue);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--unicef-blue);
 }
 .entry-head {
   display: flex;
@@ -313,7 +364,7 @@ body {
   font-size: 0.72rem;
   font-weight: 800;
   padding: 0.18rem 0.55rem;
-  border-radius: 8px;
+  border-radius: 4px;
   letter-spacing: 0.04em;
 }
 .entry-date { font-size: 0.75rem; color: var(--muted); flex: 1; }
@@ -330,9 +381,9 @@ body {
   border: 1px solid var(--border);
   color: var(--muted);
   padding: 0.18rem 0.55rem;
-  border-radius: 20px;
+  border-radius: 4px;
 }
-.entry-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-top: 0.65rem; }
+.entry-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: var(--radius-sm); margin-top: 0.65rem; }
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
 .empty-state .ei { font-size: 2.5rem; margin-bottom: 0.5rem; }
 .empty-state p { font-size: 0.85rem; line-height: 1.6; }
@@ -350,7 +401,7 @@ body {
 }
 .stat-box:last-child { border-right: none; }
 .stat-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 1.7rem;
   color: var(--blue-dark);
   line-height: 1;
@@ -385,14 +436,15 @@ body {
   to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 .modal-top {
-  background: var(--blue-dark);
+  background: var(--blue-navy);
   color: var(--white);
   padding: 1.1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 2px solid var(--unicef-blue);
 }
-.modal-top h3 { font-size: 1rem; font-weight: 800; }
+.modal-top h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; }
 .modal-close {
   background: rgba(255,255,255,0.15);
   border: none;
@@ -421,7 +473,7 @@ body {
   border: 1.5px solid var(--border);
   border-radius: 10px;
   padding: 0.6rem 0.85rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   color: var(--ink);
   background: var(--white);
@@ -447,7 +499,7 @@ body {
   border: none;
   border-radius: 10px;
   padding: 0.75rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 800;
   cursor: pointer;
@@ -460,7 +512,7 @@ body {
   border: none;
   border-radius: 10px;
   padding: 0.75rem 1.1rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
@@ -484,16 +536,18 @@ body {
 /* ── FOOTER ── */
 footer {
   text-align: center;
-  padding: 1rem;
-  font-size: 0.75rem;
+  padding: 1.4rem 1rem;
+  font-size: 0.72rem;
   color: var(--muted);
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.03em;
 }
 
 /* ── WEEK SELECTOR ── */
 #week-selector-bar {
-  background: #1A3A6E;
+  background: var(--blue-navy);
   padding: 0.75rem 1.25rem 0.85rem;
-  border-bottom: 3px solid #1CABE2;
+  border-bottom: 3px solid var(--unicef-blue);
 }
 .ws-label {
   font-size: 0.72rem;
@@ -515,7 +569,7 @@ footer {
   border: 1.5px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.75);
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
@@ -597,10 +651,92 @@ footer {
 
 /* ── APP SHELL / SIDEBAR ── */
 .app-shell { display: flex; min-height: 100vh; }
+
+/* ── LOGIN ── */
+.login-screen {
+  position: fixed; inset: 0;
+  background: var(--blue-deep);
+  background-image: radial-gradient(circle at 15% 15%, rgba(28,171,226,0.18), transparent 45%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+  gap: 1.4rem;
+}
+.login-letterhead {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.login-letterhead .lh-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--unicef-blue); }
+.login-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 48px rgba(0,16,40,0.35);
+  padding: 2.4rem 1.9rem;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  border-top: 4px solid var(--unicef-blue);
+}
+.login-logo {
+  font-size: 1.5rem;
+  margin: 0 auto 0.9rem;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--blue-pale);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; color: var(--blue-deep); margin-bottom: 0.25rem; }
+.login-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
+.login-card .form-group { text-align: left; }
+.login-error {
+  background: #FDEDED;
+  color: #C0392B;
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.9rem;
+  font-weight: 600;
+}
+
+/* ── ROLE BADGE (Mamá/Papá) ── */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.role-badge.mama { background: var(--warm-pale); color: #B05A1E; }
+.role-badge.papa { background: var(--blue-light); color: var(--blue-dark); }
+.role-badge.sb-topbar { font-size: 0.68rem; padding: 0.2rem 0.6rem; background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
+.entry-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
 .sidebar {
   width: 230px;
   flex-shrink: 0;
-  background: #0E1C30;
+  background: var(--blue-navy);
   display: flex;
   flex-direction: column;
   padding: 1.1rem 0.7rem;
@@ -622,9 +758,9 @@ footer {
 .sidebar-logo {
   width: 38px; height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  background: var(--unicef-blue);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 .sidebar-collapse-btn {
@@ -652,7 +788,7 @@ footer {
   border-radius: 11px;
   padding: 0.65rem 0.7rem;
   color: rgba(255,255,255,0.65);
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
@@ -705,12 +841,34 @@ footer {
 </head>
 <body>
 
-<div class="app-shell">
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="login-screen" style="display:none">
+  <div class="login-letterhead">
+    <span class="lh-dot"></span><span class="lh-dot"></span>
+  </div>
+  <div class="login-card">
+    <div class="login-logo">👶</div>
+    <h2>Nuñez Bardales</h2>
+    <p class="login-sub">Acceso con cuenta de mamá o papá</p>
+    <div class="form-group">
+      <label>Correo</label>
+      <input type="email" id="login-email" placeholder="tu@correo.com" autocomplete="username" onkeydown="if(event.key==='Enter') handleLogin()">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleLogin()">
+    </div>
+    <div id="login-error" class="login-error" style="display:none"></div>
+    <button class="btn-save" id="login-btn" onclick="handleLogin()" style="width:100%">Iniciar sesión</button>
+  </div>
+</div>
+
+<div class="app-shell" id="app-shell" style="display:none">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-top">
-    <div class="sidebar-logo">🤱</div>
+    <div class="sidebar-logo">👶</div>
     <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" onclick="toggleSidebar()">‹</button>
   </div>
   <nav class="sidebar-nav">
@@ -728,9 +886,12 @@ footer {
 <!-- MAIN CONTENT -->
 <div class="main-content">
 
+<!-- LETTERHEAD -->
+<div class="letterhead"><span class="lh-dot"></span>Cartilla digital de seguimiento prenatal<span class="lh-dot"></span></div>
+
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-logo"><span>🤱</span> Control de Embarazo</div>
+  <div class="topbar-logo"><span>👶</span> </div>
   <div class="topbar-fields">
     <div class="topbar-field">
       <label>Mamá:</label>
@@ -739,6 +900,11 @@ footer {
     <div class="topbar-field">
       <label>Papá:</label>
       <input type="text" id="papa-name-input" placeholder="Tu nombre">
+    </div>
+    <div class="topbar-field" id="session-info" style="display:none">
+      <span class="role-badge sb-topbar" id="session-role">—</span>
+      <label id="session-email">—</label>
+      <button onclick="handleLogout()" style="background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:6px;padding:0.25rem 0.55rem;cursor:pointer;font-size:0.72rem;font-weight:700;margin-left:0.4rem;">Salir</button>
     </div>
   </div>
 </div>
@@ -909,7 +1075,7 @@ footer {
   </div>
 </div>
 
-<footer>Control de embarazo · Hecho con 💙 para mamás</footer>
+<footer>Control de Embarazo · Cartilla digital de seguimiento prenatal · Te ama mamá y papá</footer>
 
 </div><!-- /main-content -->
 </div><!-- /app-shell -->
@@ -956,28 +1122,161 @@ const SIZES = [
 // ── SUPABASE CONFIG ──
 const SB_URL = 'https://fiuuejnnivritwrhrtlb.supabase.co';
 const SB_PUB = 'sb_publishable_mfFsvdFyz1UbkKCU0HMCbw_Ll1RYKHp';
-const SB_HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SB_PUB,
-  'Authorization': 'Bearer ' + SB_PUB,
-  'Prefer': 'return=representation'
-};
+const SESSION_KEY = 'embarazo_session';
+let SB_SESSION = null; // { access_token, refresh_token, expires_at, email }
+
+function sbHeaders(extra = {}) {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SB_PUB,
+    'Authorization': 'Bearer ' + (SB_SESSION ? SB_SESSION.access_token : SB_PUB),
+    'Prefer': 'return=representation',
+    ...extra
+  };
+}
 
 async function sbGet(table, params = '') {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: SB_HEADERS });
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: sbHeaders() });
   return r.ok ? r.json() : [];
 }
 async function sbPost(table, body) {
-  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body) });
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders(), body: JSON.stringify(body) });
   return r.ok ? r.json() : null;
 }
 async function sbDelete(table, filter) {
-  await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: SB_HEADERS });
+  await fetch(`${SB_URL}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: sbHeaders() });
 }
 async function sbUpsert(table, body) {
-  const h = { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=representation' };
+  const h = sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=representation' });
   const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: h, body: JSON.stringify(body) });
   return r.ok ? r.json() : null;
+}
+
+// ── AUTH (Supabase Auth / GoTrue) ──
+async function authSignIn(email, password) {
+  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SB_PUB },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error_description || data.msg || 'Credenciales inválidas');
+  return data;
+}
+async function authRefresh(refresh_token) {
+  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SB_PUB },
+    body: JSON.stringify({ refresh_token })
+  });
+  return r.ok ? r.json() : null;
+}
+async function authSignOut() {
+  if (!SB_SESSION) return;
+  try {
+    await fetch(`${SB_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'apikey': SB_PUB, 'Authorization': 'Bearer ' + SB_SESSION.access_token }
+    });
+  } catch (e) {}
+}
+
+function saveSession(session) {
+  SB_SESSION = session;
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (e) {}
+}
+function loadStoredSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function clearSession() {
+  SB_SESSION = null;
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+}
+
+async function handleLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errBox   = document.getElementById('login-error');
+  errBox.style.display = 'none';
+  if (!email || !password) {
+    errBox.textContent = 'Completa correo y contraseña.';
+    errBox.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Ingresando…';
+  try {
+    const data = await authSignIn(email, password);
+    const meta = (data.user && data.user.user_metadata) || {};
+    let rol = meta.rol === 'papa' ? 'papa' : meta.rol === 'mama' ? 'mama' : null;
+    if (!rol) {
+      // Respaldo: si la cuenta no tiene el rol guardado en sus metadatos, se deduce del correo
+      const lower = email.toLowerCase();
+      rol = lower.includes('papa') ? 'papa' : lower.includes('mama') ? 'mama' : 'mama';
+    }
+    saveSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in * 1000),
+      email: (data.user && data.user.email) || email,
+      rol
+    });
+    enterApp();
+  } catch (e) {
+    errBox.textContent = 'Correo o contraseña incorrectos.';
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  }
+}
+
+async function handleLogout() {
+  await authSignOut();
+  clearSession();
+  location.reload();
+}
+
+function enterApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = '';
+  document.getElementById('session-info').style.display = 'flex';
+  document.getElementById('session-email').textContent = SB_SESSION.email;
+  const roleEl = document.getElementById('session-role');
+  roleEl.textContent = SB_SESSION.rol === 'papa' ? '👨 Papá' : '👩 Mamá';
+  roleEl.className = 'role-badge sb-topbar ' + (SB_SESSION.rol === 'papa' ? 'papa' : 'mama');
+  initSidebarForViewport();
+  loadFromCloud();
+}
+
+async function checkSession() {
+  const stored = loadStoredSession();
+  if (!stored) {
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
+  if (Date.now() > stored.expires_at - 30000) {
+    const refreshed = await authRefresh(stored.refresh_token);
+    if (!refreshed) {
+      clearSession();
+      document.getElementById('login-screen').style.display = 'flex';
+      return;
+    }
+    const meta = (refreshed.user && refreshed.user.user_metadata) || {};
+    const rol = meta.rol === 'papa' ? 'papa' : meta.rol === 'mama' ? 'mama' : stored.rol;
+    saveSession({
+      access_token: refreshed.access_token,
+      refresh_token: refreshed.refresh_token,
+      expires_at: Date.now() + (refreshed.expires_in * 1000),
+      email: stored.email,
+      rol
+    });
+  } else {
+    SB_SESSION = stored;
+  }
+  enterApp();
 }
 
 let entries = [];
@@ -1006,7 +1305,8 @@ async function loadFromCloud() {
     entries = rows.map(r => ({
       id: r.id, week: r.semana, date: r.fecha,
       text: r.nota, papa: r.mensaje_papa, mama: r.mensaje_mama, belly: r.barriga,
-      mood: r.estado_animo, photo: r.foto
+      mood: r.estado_animo, photo: r.foto,
+      rol: r.creado_por_rol, email: r.creado_por_email
     }));
 
     // Config (semana + checklist)
@@ -1030,7 +1330,7 @@ async function loadFromCloud() {
   else renderEntries();
 }
 
-window.addEventListener('DOMContentLoaded', () => { loadFromCloud(); });
+window.addEventListener('DOMContentLoaded', () => { checkSession(); });
 
 document.getElementById('baby-name-input').addEventListener('change', async () => {
   const name = document.getElementById('baby-name-input').value.trim();
@@ -1199,12 +1499,14 @@ async function saveEntry() {
     mensaje_mama: mama || null,
     barriga: belly ? parseFloat(belly) : null,
     estado_animo: mood || null,
-    foto: currentPhotoData || null
+    foto: currentPhotoData || null,
+    creado_por_rol: SB_SESSION ? SB_SESSION.rol : null,
+    creado_por_email: SB_SESSION ? SB_SESSION.email : null
   };
 
   const saved = await sbPost('entradas', row);
   if (saved) {
-    entries.unshift({ id: row.id, week, date: fecha, text, papa, mama, belly: row.barriga, mood, photo: currentPhotoData });
+    entries.unshift({ id: row.id, week, date: fecha, text, papa, mama, belly: row.barriga, mood, photo: currentPhotoData, rol: row.creado_por_rol, email: row.creado_por_email });
     showToast('✓ Entrada guardada en la nube');
   } else {
     showToast('Error al guardar', false);
@@ -1243,12 +1545,17 @@ function renderEntries() {
     let chips = '';
     if (e.mood)   chips += `<span class="chip">${e.mood}</span>`;
     if (e.belly)  chips += `<span class="chip">📏 ${e.belly} cm</span>`;
+    const roleLabel = e.rol === 'papa' ? '👨 Papá' : e.rol === 'mama' ? '👩 Mamá' : null;
+    const authorHtml = roleLabel
+      ? `<div class="entry-author"><span class="role-badge ${e.rol === 'papa' ? 'papa' : 'mama'}">${roleLabel}</span>${e.email ? `<span>${e.email}</span>` : ''}</div>`
+      : '';
     card.innerHTML = `
       <div class="entry-head">
         <span class="entry-week">Sem. ${e.week}</span>
         <span class="entry-date">${e.date}</span>
         <button class="entry-del" onclick="deleteEntry(${e.id})">✕</button>
       </div>
+      ${authorHtml}
       ${e.text ? `<p class="entry-note">${e.text}</p>` : ''}
       ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
       ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
