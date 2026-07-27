@@ -537,6 +537,68 @@ body {
   transition: border-color 0.2s;
 }
 .photo-label:hover { border-color: var(--blue); }
+
+/* ── MEDIA GRID ── */
+#media-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.media-thumb {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--blue-pale);
+  border: 1px solid var(--border);
+}
+.media-thumb img,
+.media-thumb video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.media-thumb .remove-media {
+  position: absolute;
+  top: 3px; right: 3px;
+  background: rgba(20,44,80,0.75);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.media-thumb .vid-badge {
+  position: absolute;
+  bottom: 3px; left: 3px;
+  background: rgba(20,44,80,0.75);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  pointer-events: none;
+}
+/* entry media grid */
+.entry-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.entry-media-grid img {
+  width: 100%; border-radius: 8px;
+  aspect-ratio: 1; object-fit: cover;
+  cursor: pointer;
+}
+.entry-media-grid video {
+  width: 100%; border-radius: 8px;
+  aspect-ratio: 1; object-fit: cover;
+}
 #photo-input { display: none; }
 #photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem; display: none; }
 
@@ -1124,10 +1186,10 @@ footer {
         </select>
       </div>
       <div class="form-group">
-        <label>📸 Foto (opcional)</label>
-        <label class="photo-label" for="photo-input">📷 Seleccionar foto</label>
-        <input type="file" id="photo-input" accept="image/*" onchange="previewPhoto(this)">
-        <img id="photo-preview" alt="Vista previa">
+        <label>📸 Fotos y videos (opcional)</label>
+        <label class="photo-label" for="photo-input">📷🎥 Seleccionar fotos / videos</label>
+        <input type="file" id="photo-input" accept="image/*,video/*" multiple onchange="previewMedia(this)">
+        <div id="media-preview-grid"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1368,7 +1430,17 @@ async function loadFromCloud() {
     entries = rows.map(r => ({
       id: r.id, week: r.semana, date: r.fecha,
       text: r.nota, papa: r.mensaje_papa, mama: r.mensaje_mama, belly: r.barriga,
-      mood: r.estado_animo, photo: r.foto,
+      mood: r.estado_animo,
+      media: (() => {
+        const f = r.foto;
+        if (!f) return [];
+        // nuevo formato: JSON array
+        if (f.trim().startsWith('[')) {
+          try { return JSON.parse(f); } catch(e) {}
+        }
+        // formato antiguo: base64 o URL directa
+        return [{ type: 'image', data: f }];
+      })(),
       rol: r.creado_por_rol, email: r.creado_por_email
     }));
 
@@ -1492,10 +1564,24 @@ function openModal(entryId = null) {
     document.getElementById('note-mama').value  = e.mama  || '';
     document.getElementById('note-belly').value = e.belly || '';
     document.getElementById('note-mood').value  = e.mood  || '';
-    if (e.photo) {
-      currentPhotoData = e.photo;
-      const prev = document.getElementById('photo-preview');
-      prev.src = e.photo; prev.style.display = 'block';
+    if (e.media && e.media.length) {
+      currentMediaFiles = [...e.media];
+      const grid = document.getElementById('media-preview-grid');
+      grid.innerHTML = '';
+      e.media.forEach((m, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'media-thumb';
+        thumb.dataset.idx = idx;
+        if (m.type === 'video') {
+          thumb.innerHTML = `<video src="${m.data}" muted playsinline></video>
+            <span class="vid-badge">▶ Video</span>
+            <button class="remove-media" onclick="removeMedia(${idx})">✕</button>`;
+        } else {
+          thumb.innerHTML = `<img src="${m.data}" alt="foto">
+            <button class="remove-media" onclick="removeMedia(${idx})">✕</button>`;
+        }
+        grid.appendChild(thumb);
+      });
     }
     if (titleEl) titleEl.innerHTML = `✏️ Editar · Semana <span id="modal-week">${e.week}</span>`;
     if (saveBtn) saveBtn.textContent = 'Guardar cambios';
@@ -1514,7 +1600,8 @@ function closeModal() {
   document.getElementById('note-mama').value   = '';
   document.getElementById('note-belly').value  = '';
   document.getElementById('note-mood').value   = '';
-  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('media-preview-grid').innerHTML = '';
+  currentMediaFiles = [];
   currentPhotoData = null;
   editingId = null;
 }
@@ -1558,15 +1645,45 @@ function toggleEntries() {
   document.getElementById('toggle-entries-btn').textContent = entriesVisible ? '🙈 Ocultar entradas' : '👁️ Ver entradas';
 }
 
-function previewPhoto(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentPhotoData = e.target.result;
-    const prev = document.getElementById('photo-preview');
-    prev.src = currentPhotoData; prev.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+// currentMediaFiles: array of {type:'image'|'video', data: base64 string, mime: string}
+let currentMediaFiles = [];
+
+function previewMedia(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const grid = document.getElementById('media-preview-grid');
+
+  files.forEach(file => {
+    const isVideo = file.type.startsWith('video/');
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const data = ev.target.result;
+      const idx = currentMediaFiles.length;
+      currentMediaFiles.push({ type: isVideo ? 'video' : 'image', data, mime: file.type });
+
+      const thumb = document.createElement('div');
+      thumb.className = 'media-thumb';
+      thumb.dataset.idx = idx;
+      if (isVideo) {
+        thumb.innerHTML = `<video src="${data}" muted playsinline></video>
+          <span class="vid-badge">▶ Video</span>
+          <button class="remove-media" onclick="removeMedia(${idx})">✕</button>`;
+      } else {
+        thumb.innerHTML = `<img src="${data}" alt="foto">
+          <button class="remove-media" onclick="removeMedia(${idx})">✕</button>`;
+      }
+      grid.appendChild(thumb);
+    };
+    reader.readAsDataURL(file);
+  });
+  // reset input so same file can be re-added
+  input.value = '';
+}
+
+function removeMedia(idx) {
+  currentMediaFiles[idx] = null;
+  const thumb = document.querySelector(`.media-thumb[data-idx="${idx}"]`);
+  if (thumb) thumb.remove();
 }
 
 async function saveEntry() {
@@ -1581,6 +1698,9 @@ async function saveEntry() {
   if (editingId !== null) {
     // ── MODO EDICIÓN ──
     const existing = entries.find(e => e.id === editingId);
+    const mediaArr = currentMediaFiles.filter(Boolean);
+    const existingMedia = (existing && existing.media) ? existing.media : [];
+    const finalMedia = mediaArr.length ? mediaArr : existingMedia;
     const row = {
       id: editingId,
       semana: existing ? existing.week : week,
@@ -1590,14 +1710,14 @@ async function saveEntry() {
       mensaje_mama: mama || null,
       barriga: belly ? parseFloat(belly) : null,
       estado_animo: mood || null,
-      foto: currentPhotoData || null,
+      foto: finalMedia.length ? JSON.stringify(finalMedia) : null,
       creado_por_rol: existing ? existing.rol : (SB_SESSION ? SB_SESSION.rol : null),
       creado_por_email: existing ? existing.email : (SB_SESSION ? SB_SESSION.email : null)
     };
     const updated = await sbUpsert('entradas', row);
     if (updated) {
       const idx = entries.findIndex(e => e.id === editingId);
-      if (idx !== -1) entries[idx] = { ...entries[idx], text, papa, mama, belly: row.barriga, mood, photo: currentPhotoData };
+      if (idx !== -1) entries[idx] = { ...entries[idx], text, papa, mama, belly: row.barriga, mood, media: finalMedia };
       showToast('✓ Entrada actualizada');
     } else {
       showToast('Error al actualizar', false);
@@ -1605,6 +1725,7 @@ async function saveEntry() {
   } else {
     // ── MODO NUEVA ENTRADA ──
     const fecha = new Date().toLocaleDateString('es', {day:'numeric',month:'long',year:'numeric'});
+    const mediaArr = currentMediaFiles.filter(Boolean);
     const row = {
       id: Date.now(),
       semana: week,
@@ -1614,13 +1735,13 @@ async function saveEntry() {
       mensaje_mama: mama || null,
       barriga: belly ? parseFloat(belly) : null,
       estado_animo: mood || null,
-      foto: currentPhotoData || null,
+      foto: mediaArr.length ? JSON.stringify(mediaArr) : null,
       creado_por_rol: SB_SESSION ? SB_SESSION.rol : null,
       creado_por_email: SB_SESSION ? SB_SESSION.email : null
     };
     const saved = await sbPost('entradas', row);
     if (saved) {
-      entries.unshift({ id: row.id, week, date: fecha, text, papa, mama, belly: row.barriga, mood, photo: currentPhotoData, rol: row.creado_por_rol, email: row.creado_por_email });
+      entries.unshift({ id: row.id, week, date: fecha, text, papa, mama, belly: row.barriga, mood, media: mediaArr, rol: row.creado_por_rol, email: row.creado_por_email });
       showToast('✓ Entrada guardada en la nube');
     } else {
       showToast('Error al guardar', false);
@@ -1628,6 +1749,108 @@ async function saveEntry() {
   }
   closeModal();
   renderEntries();
+}
+
+// Gallery lightbox
+let _lbImages = [];
+let _lbIdx = 0;
+
+function openLightbox(src, allImages) {
+  _lbImages = allImages || [src];
+  _lbIdx    = _lbImages.indexOf(src);
+  if (_lbIdx < 0) _lbIdx = 0;
+  renderLightbox();
+}
+
+function renderLightbox() {
+  let lb = document.getElementById('lightbox');
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.id = 'lightbox';
+    lb.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.95);
+      z-index:9999;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;padding:1rem`;
+    document.body.appendChild(lb);
+  }
+
+  const total = _lbImages.length;
+  const src   = _lbImages[_lbIdx];
+  const hasPrev = _lbIdx > 0;
+  const hasNext = _lbIdx < total - 1;
+
+  lb.innerHTML = `
+    <div style="position:relative;width:100%;max-width:860px;display:flex;align-items:center;justify-content:center">
+      <!-- PREV -->
+      <button onclick="lbNav(-1)" style="
+        position:absolute;left:0;z-index:2;
+        background:rgba(255,255,255,0.12);border:none;color:#fff;
+        width:44px;height:44px;border-radius:50%;font-size:1.4rem;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;
+        opacity:${hasPrev ? 1 : 0.2};pointer-events:${hasPrev ? 'auto' : 'none'};
+        transition:background 0.15s">‹</button>
+
+      <!-- IMAGE -->
+      <img src="${src}" style="
+        max-width:calc(100% - 110px);max-height:80vh;
+        border-radius:10px;object-fit:contain;
+        box-shadow:0 8px 40px rgba(0,0,0,0.6)" alt="foto">
+
+      <!-- NEXT -->
+      <button onclick="lbNav(1)" style="
+        position:absolute;right:0;z-index:2;
+        background:rgba(255,255,255,0.12);border:none;color:#fff;
+        width:44px;height:44px;border-radius:50%;font-size:1.4rem;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;
+        opacity:${hasNext ? 1 : 0.2};pointer-events:${hasNext ? 'auto' : 'none'};
+        transition:background 0.15s">›</button>
+    </div>
+
+    <!-- COUNTER -->
+    ${total > 1 ? `<div style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-top:0.75rem;font-weight:600">${_lbIdx + 1} / ${total}</div>` : ''}
+
+    <!-- THUMBNAILS -->
+    ${total > 1 ? `<div style="display:flex;gap:0.4rem;margin-top:0.75rem;flex-wrap:wrap;justify-content:center;max-width:860px">
+      ${_lbImages.map((s,i) => `
+        <img src="${s}" onclick="lbGoto(${i})" style="
+          width:54px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;
+          border:2px solid ${i===_lbIdx ? '#1CABE2' : 'transparent'};
+          opacity:${i===_lbIdx ? 1 : 0.5};transition:opacity 0.15s">`).join('')}
+    </div>` : ''}
+
+    <!-- CLOSE -->
+    <button onclick="closeLightbox()" style="
+      position:fixed;top:1rem;right:1rem;
+      background:rgba(255,255,255,0.15);border:none;color:#fff;
+      width:40px;height:40px;border-radius:50%;font-size:1.1rem;
+      cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center">✕</button>
+  `;
+
+  // keyboard nav
+  document.onkeydown = (e) => {
+    if (!document.getElementById('lightbox')) return;
+    if (e.key === 'ArrowLeft')  lbNav(-1);
+    if (e.key === 'ArrowRight') lbNav(1);
+    if (e.key === 'Escape')     closeLightbox();
+  };
+}
+
+function lbNav(dir) {
+  const next = _lbIdx + dir;
+  if (next >= 0 && next < _lbImages.length) {
+    _lbIdx = next;
+    renderLightbox();
+  }
+}
+
+function lbGoto(i) {
+  _lbIdx = i;
+  renderLightbox();
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (lb) lb.remove();
+  document.onkeydown = null;
 }
 
 async function deleteEntry(id) {
@@ -1676,7 +1899,22 @@ function renderEntries() {
       ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
       ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
       ${chips ? `<div class="entry-chips">${chips}</div>` : ''}
-      ${e.photo ? `<img class="entry-photo" src="${e.photo}" alt="Foto">` : ''}`;
+      ${(e.media && e.media.length) ? (() => {
+        const imgs = e.media.filter(m => m.type !== 'video').map(m => m.data);
+        return `<div class="entry-media-grid">${e.media.map((m,i) => {
+          if (m.type === 'video') {
+            return `<div style="position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:#000">
+              <video src="${m.data}" controls playsinline style="width:100%;height:100%;object-fit:cover"></video>
+              <span style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.65);color:#fff;font-size:0.6rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;pointer-events:none">▶ VIDEO</span>
+            </div>`;
+          }
+          const allImgs = JSON.stringify(imgs).replace(/"/g, '&quot;');
+          return `<img src="${m.data}" alt="foto ${i+1}"
+            style="cursor:zoom-in;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;transition:opacity 0.15s"
+            onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1"
+            onclick="openLightbox('${m.data}', ${allImgs})">`;
+        }).join('')}</div>`;
+      })() : ''}`;
     container.appendChild(card);
   }
 }
