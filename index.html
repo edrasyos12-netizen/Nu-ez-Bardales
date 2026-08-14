@@ -1170,7 +1170,7 @@ footer {
         <input type="file" id="photo-input" accept="image/*,video/*" onchange="previewMedia(this)">
         <img id="photo-preview" alt="Vista previa">
         <video id="video-preview" controls playsinline></video>
-        <span class="media-hint">Fotos hasta 5 MB · Videos cortos hasta 8 MB</span>
+        <span class="media-hint">Fotos hasta 10 MB · Videos en buena calidad hasta ~1 min (60 MB)</span>
       </div>
     </div>
     <div class="modal-footer">
@@ -1387,6 +1387,42 @@ async function checkSession() {
 let entries = [];
 let checks  = {};
 let currentPhotoData = null;
+const SB_BUCKET = 'media';
+let isUploadingMedia = false;
+let localPreviewUrl = null;
+
+function isVideoUrl(url) {
+  return /\.(mp4|mov|webm|m4v|3gp)(\?.*)?$/i.test(url || '') || (url || '').startsWith('data:video');
+}
+
+function extFromFile(file) {
+  const map = {
+    'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+    'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/webm': 'webm', 'video/3gpp': '3gp'
+  };
+  if (map[file.type]) return map[file.type];
+  const fromName = (file.name || '').split('.').pop();
+  return fromName ? fromName.toLowerCase() : 'bin';
+}
+
+async function uploadToStorage(file) {
+  const path = `entradas/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extFromFile(file)}`;
+  const r = await fetch(`${SB_URL}/storage/v1/object/${SB_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_PUB,
+      'Authorization': 'Bearer ' + (SB_SESSION ? SB_SESSION.access_token : SB_PUB),
+      'Content-Type': file.type || 'application/octet-stream',
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error(errText || 'Error al subir el archivo');
+  }
+  return `${SB_URL}/storage/v1/object/public/${SB_BUCKET}/${path}`;
+}
 let currentWeekNum   = 0;
 let editingId        = null; // null = nueva entrada, número = editando esa entrada
 
@@ -1539,7 +1575,7 @@ function openModal(entryId = null) {
       currentPhotoData = e.photo;
       const imgPrev = document.getElementById('photo-preview');
       const vidPrev = document.getElementById('video-preview');
-      if (e.photo.startsWith('data:video')) {
+      if (isVideoUrl(e.photo)) {
         vidPrev.src = e.photo; vidPrev.style.display = 'block';
         imgPrev.style.display = 'none';
       } else {
@@ -1571,7 +1607,9 @@ function closeModal() {
   vidPrev.style.display = 'none';
   vidPrev.removeAttribute('src');
   document.getElementById('photo-input').value = '';
+  if (localPreviewUrl) { URL.revokeObjectURL(localPreviewUrl); localPreviewUrl = null; }
   currentPhotoData = null;
+  isUploadingMedia = false;
   editingId = null;
 }
 function closeBg(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
@@ -1614,32 +1652,47 @@ function toggleEntries() {
   document.getElementById('toggle-entries-btn').textContent = entriesVisible ? '🙈 Ocultar entradas' : '👁️ Ver entradas';
 }
 
-function previewMedia(input) {
+async function previewMedia(input) {
   const file = input.files[0]; if (!file) return;
   const isVideo = file.type.startsWith('video/');
-  const maxBytes = isVideo ? 8 * 1024 * 1024 : 5 * 1024 * 1024;
+  const maxBytes = isVideo ? 60 * 1024 * 1024 : 10 * 1024 * 1024;
   if (file.size > maxBytes) {
-    alert(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Elige ${isVideo ? 'un video más corto' : 'una foto'} de menos de ${(maxBytes / 1024 / 1024)} MB para poder guardarlo.`);
+    alert(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Elige ${isVideo ? 'un video más corto o de menor calidad' : 'una foto'} de menos de ${(maxBytes / 1024 / 1024)} MB.`);
     input.value = '';
     return;
   }
+
   const imgPrev = document.getElementById('photo-preview');
   const vidPrev = document.getElementById('video-preview');
-  const reader = new FileReader();
-  reader.onload = e => {
-    currentPhotoData = e.target.result;
-    if (isVideo) {
-      vidPrev.src = currentPhotoData; vidPrev.style.display = 'block';
-      imgPrev.style.display = 'none'; imgPrev.removeAttribute('src');
-    } else {
-      imgPrev.src = currentPhotoData; imgPrev.style.display = 'block';
-      vidPrev.pause(); vidPrev.style.display = 'none'; vidPrev.removeAttribute('src');
-    }
-  };
-  reader.readAsDataURL(file);
+
+  if (localPreviewUrl) { URL.revokeObjectURL(localPreviewUrl); localPreviewUrl = null; }
+  localPreviewUrl = URL.createObjectURL(file);
+
+  if (isVideo) {
+    vidPrev.src = localPreviewUrl; vidPrev.style.display = 'block';
+    imgPrev.style.display = 'none'; imgPrev.removeAttribute('src');
+  } else {
+    imgPrev.src = localPreviewUrl; imgPrev.style.display = 'block';
+    vidPrev.pause(); vidPrev.style.display = 'none'; vidPrev.removeAttribute('src');
+  }
+
+  isUploadingMedia = true;
+  currentPhotoData = null;
+  showToast('⏳ Subiendo archivo…');
+  try {
+    const url = await uploadToStorage(file);
+    currentPhotoData = url;
+    showToast('✓ Archivo subido');
+  } catch (err) {
+    showToast('Error al subir el archivo', false);
+    input.value = '';
+  } finally {
+    isUploadingMedia = false;
+  }
 }
 
 async function saveEntry() {
+  if (isUploadingMedia) { alert('Espera a que termine de subirse el archivo antes de guardar.'); return; }
   const week   = currentWeekNum || 0;
   const text   = document.getElementById('note-text').value.trim();
   const papa   = document.getElementById('note-papa').value.trim();
@@ -1746,7 +1799,7 @@ function renderEntries() {
       ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
       ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
       ${chips ? `<div class="entry-chips">${chips}</div>` : ''}
-      ${e.photo ? (e.photo.startsWith('data:video') ? `<video class="entry-video" src="${e.photo}" controls playsinline></video>` : `<img class="entry-photo" src="${e.photo}" alt="Foto">`) : ''}`;
+      ${e.photo ? (isVideoUrl(e.photo) ? `<video class="entry-video" src="${e.photo}" controls playsinline></video>` : `<img class="entry-photo" src="${e.photo}" alt="Foto">`) : ''}`;
     container.appendChild(card);
   }
 }
