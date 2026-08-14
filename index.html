@@ -35,6 +35,8 @@
   --border:        #D5E6F2;
   --green:         #00AC6B;
   --green-light:   #DEF5EC;
+  --red:           #E14B4B;
+  --red-light:     rgba(225,75,75,0.35);
   --shadow:        0 4px 22px rgba(20,44,80,0.08);
   --shadow-soft:   0 2px 10px rgba(20,44,80,0.06);
   --radius:        14px;
@@ -651,6 +653,16 @@ footer {
   border-color: var(--green);
   color: #fff;
   box-shadow: 0 0 0 3px rgba(0,172,107,0.35);
+}
+.ws-btn.due {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  animation: duePulse 1.6s ease-in-out infinite;
+}
+@keyframes duePulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--red-light); }
+  50%      { box-shadow: 0 0 0 7px rgba(225,75,75,0.12); }
 }
 
 /* ── APP SHELL / SIDEBAR ── */
@@ -1520,6 +1532,10 @@ async function loadFromCloud() {
 
 window.addEventListener('DOMContentLoaded', () => { checkSession(); });
 
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) renderWeekGrid();
+});
+
 document.getElementById('baby-name-input').addEventListener('change', async () => {
   const name = document.getElementById('baby-name-input').value.trim();
   await sbUpsert('configuracion', { clave: 'nombre_mama', valor: name });
@@ -1533,14 +1549,17 @@ document.getElementById('papa-name-input').addEventListener('change', async () =
 function renderWeekGrid() {
   const grid = document.getElementById('ws-grid');
   grid.innerHTML = '';
+  const isWednesday = new Date().getDay() === 3; // 0=domingo … 3=miércoles
+  const dueWeek = isWednesday ? currentWeekNum + 1 : null;
   for (let w = 1; w <= 40; w++) {
     const btn = document.createElement('button');
     let cls = 'ws-btn';
     if (w === currentWeekNum) cls += ' active';
     else if (w < currentWeekNum) cls += ' passed';
+    if (w === dueWeek) cls += ' due';
     btn.className = cls;
     btn.textContent = w;
-    btn.title = 'Semana ' + w;
+    btn.title = 'Semana ' + w + (w === dueWeek ? ' · ¡Es miércoles! Toca para avanzar a esta semana' : '');
     btn.onclick = () => selectWeek(w);
     grid.appendChild(btn);
   }
