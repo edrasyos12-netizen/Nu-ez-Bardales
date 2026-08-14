@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Embarazo · Semana a Semana</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00305C">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Embarazo">
+
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -391,6 +402,7 @@ body {
   border-radius: 4px;
 }
 .entry-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: var(--radius-sm); margin-top: 0.65rem; }
+.entry-video { width: 100%; max-height: 260px; border-radius: var(--radius-sm); margin-top: 0.65rem; background: #000; }
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
 .empty-state .ei { font-size: 2.5rem; margin-bottom: 0.5rem; }
 .empty-state p { font-size: 0.85rem; line-height: 1.6; }
@@ -539,6 +551,8 @@ body {
 .photo-label:hover { border-color: var(--blue); }
 #photo-input { display: none; }
 #photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 0.5rem; display: none; }
+#video-preview { width: 100%; max-height: 180px; border-radius: 8px; margin-top: 0.5rem; display: none; background: #000; }
+.media-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; display: block; }
 
 /* ── FOOTER ── */
 footer {
@@ -995,6 +1009,7 @@ footer {
       <button onclick="handleLogout()" style="background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:6px;padding:0.25rem 0.55rem;cursor:pointer;font-size:0.72rem;font-weight:700;margin-left:0.4rem;">Salir</button>
     </div>
   </div>
+  <button id="install-btn" onclick="installApp()" style="display:none;background:var(--unicef-blue);border:none;color:#fff;border-radius:8px;padding:0.5rem 0.9rem;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">📲 Instalar app</button>
 </div>
 
 
@@ -1150,10 +1165,12 @@ footer {
         </select>
       </div>
       <div class="form-group">
-        <label>📸 Foto (opcional)</label>
-        <label class="photo-label" for="photo-input">📷 Seleccionar foto</label>
-        <input type="file" id="photo-input" accept="image/*" onchange="previewPhoto(this)">
+        <label>📸 Foto o video (opcional)</label>
+        <label class="photo-label" for="photo-input">📷 Seleccionar foto o video</label>
+        <input type="file" id="photo-input" accept="image/*,video/*" onchange="previewMedia(this)">
         <img id="photo-preview" alt="Vista previa">
+        <video id="video-preview" controls playsinline></video>
+        <span class="media-hint">Fotos hasta 5 MB · Videos cortos hasta 8 MB</span>
       </div>
     </div>
     <div class="modal-footer">
@@ -1520,8 +1537,15 @@ function openModal(entryId = null) {
     document.getElementById('note-mood').value  = e.mood  || '';
     if (e.photo) {
       currentPhotoData = e.photo;
-      const prev = document.getElementById('photo-preview');
-      prev.src = e.photo; prev.style.display = 'block';
+      const imgPrev = document.getElementById('photo-preview');
+      const vidPrev = document.getElementById('video-preview');
+      if (e.photo.startsWith('data:video')) {
+        vidPrev.src = e.photo; vidPrev.style.display = 'block';
+        imgPrev.style.display = 'none';
+      } else {
+        imgPrev.src = e.photo; imgPrev.style.display = 'block';
+        vidPrev.style.display = 'none';
+      }
     }
     if (titleEl) titleEl.innerHTML = `✏️ Editar · Semana <span id="modal-week">${e.week}</span>`;
     if (saveBtn) saveBtn.textContent = 'Guardar cambios';
@@ -1541,6 +1565,12 @@ function closeModal() {
   document.getElementById('note-belly').value  = '';
   document.getElementById('note-mood').value   = '';
   document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-preview').removeAttribute('src');
+  const vidPrev = document.getElementById('video-preview');
+  vidPrev.pause();
+  vidPrev.style.display = 'none';
+  vidPrev.removeAttribute('src');
+  document.getElementById('photo-input').value = '';
   currentPhotoData = null;
   editingId = null;
 }
@@ -1584,13 +1614,27 @@ function toggleEntries() {
   document.getElementById('toggle-entries-btn').textContent = entriesVisible ? '🙈 Ocultar entradas' : '👁️ Ver entradas';
 }
 
-function previewPhoto(input) {
+function previewMedia(input) {
   const file = input.files[0]; if (!file) return;
+  const isVideo = file.type.startsWith('video/');
+  const maxBytes = isVideo ? 8 * 1024 * 1024 : 5 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    alert(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Elige ${isVideo ? 'un video más corto' : 'una foto'} de menos de ${(maxBytes / 1024 / 1024)} MB para poder guardarlo.`);
+    input.value = '';
+    return;
+  }
+  const imgPrev = document.getElementById('photo-preview');
+  const vidPrev = document.getElementById('video-preview');
   const reader = new FileReader();
   reader.onload = e => {
     currentPhotoData = e.target.result;
-    const prev = document.getElementById('photo-preview');
-    prev.src = currentPhotoData; prev.style.display = 'block';
+    if (isVideo) {
+      vidPrev.src = currentPhotoData; vidPrev.style.display = 'block';
+      imgPrev.style.display = 'none'; imgPrev.removeAttribute('src');
+    } else {
+      imgPrev.src = currentPhotoData; imgPrev.style.display = 'block';
+      vidPrev.pause(); vidPrev.style.display = 'none'; vidPrev.removeAttribute('src');
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -1702,10 +1746,39 @@ function renderEntries() {
       ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
       ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
       ${chips ? `<div class="entry-chips">${chips}</div>` : ''}
-      ${e.photo ? `<img class="entry-photo" src="${e.photo}" alt="Foto">` : ''}`;
+      ${e.photo ? (e.photo.startsWith('data:video') ? `<video class="entry-video" src="${e.photo}" controls playsinline></video>` : `<img class="entry-photo" src="${e.photo}" alt="Foto">`) : ''}`;
     container.appendChild(card);
   }
 }
+
+// ── PWA: registro del service worker + botón de instalar ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'inline-block';
+});
+
+async function installApp() {
+  const btn = document.getElementById('install-btn');
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  if (btn) btn.style.display = 'none';
+}
+
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'none';
+});
 </script>
 </body>
 </html>
