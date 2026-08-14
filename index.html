@@ -439,6 +439,46 @@ body {
   padding: 1rem;
 }
 .modal-overlay.open { display: flex; }
+
+/* ── LIGHTBOX (ver foto/video en grande) ── */
+.entry-photo, .entry-video { cursor: zoom-in; }
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,18,32,0.92);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.lightbox-overlay.open { display: flex; }
+.lightbox-content {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.lightbox-content img, .lightbox-content video {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: 10px;
+  display: block;
+}
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: var(--white);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.28); }
 .modal {
   background: var(--white);
   width: 100%;
@@ -1127,6 +1167,12 @@ footer {
 </div>
 
 <!-- MODAL -->
+<!-- LIGHTBOX: ver foto/video en grande -->
+<div class="lightbox-overlay" id="lightbox-overlay" onclick="closeLightboxBg(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-content" id="lightbox-content"></div>
+</div>
+
 <div class="modal-overlay" id="modal-overlay" onclick="closeBg(event)">
   <div class="modal">
     <div class="modal-top">
@@ -1614,6 +1660,21 @@ function closeModal() {
 }
 function closeBg(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
+function openLightbox(url) {
+  const content = document.getElementById('lightbox-content');
+  content.innerHTML = isVideoUrl(url)
+    ? `<video src="${url}" controls autoplay playsinline></video>`
+    : `<img src="${url}" alt="Foto ampliada">`;
+  document.getElementById('lightbox-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox-overlay').classList.remove('open');
+  document.getElementById('lightbox-content').innerHTML = '';
+  document.body.style.overflow = '';
+}
+function closeLightboxBg(e) { if (e.target === document.getElementById('lightbox-overlay')) closeLightbox(); }
+
 function switchView(view) {
   document.getElementById('view-embarazo').style.display    = view === 'embarazo'    ? '' : 'none';
   document.getElementById('view-crecimiento').style.display = view === 'crecimiento' ? '' : 'none';
@@ -1799,7 +1860,7 @@ function renderEntries() {
       ${e.papa ? `<p class="entry-note">💌 <strong>Papá:</strong> ${e.papa}</p>` : ''}
       ${e.mama ? `<p class="entry-note">💌 <strong>Mamá:</strong> ${e.mama}</p>` : ''}
       ${chips ? `<div class="entry-chips">${chips}</div>` : ''}
-      ${e.photo ? (isVideoUrl(e.photo) ? `<video class="entry-video" src="${e.photo}" controls playsinline></video>` : `<img class="entry-photo" src="${e.photo}" alt="Foto">`) : ''}`;
+      ${e.photo ? (isVideoUrl(e.photo) ? `<video class="entry-video" src="${e.photo}" controls playsinline onclick="event.stopPropagation()"></video>` : `<img class="entry-photo" src="${e.photo}" alt="Foto" onclick="openLightbox('${e.photo.replace(/'/g, "\\'")}')">`) : ''}`;
     container.appendChild(card);
   }
 }
